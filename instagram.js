@@ -1,156 +1,160 @@
-const puppeteer = require("puppeteer");
+const puppeteer = require('puppeteer');
 
 const BASE_URL = `https://instagram.com/`;
 const TAG_URL = tag => `${BASE_URL}explore/tags/${tag}`;
 const FOLLOWING_URL = accountName =>
-	`https://www.instagram.com/${accountName}/following/`;
+  `https://www.instagram.com/${accountName}/following/`;
 
-const instagram = {
-	browser: null,
-	page: null,
+class Instagram {
+  constructor() {
+    this.browser = null;
+    this.page = null;
+  }
 
-	initialize: async () => {
-		instagram.browser = await puppeteer.launch({
-			headless: true,
-			args: ["--no-sandbox", "--disable-setuid-sandbox"]
-		});
+  async initialize() {
+    try {
+      this.browser = await puppeteer.launch({
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox']
+      });
 
-		instagram.page = await instagram.browser.newPage();
-	},
+      this.page = await this.browser.newPage();
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
-	login: async (username, password) => {
-		try {
-			await instagram.page.goto(BASE_URL, {
-				waitUntil: "networkidle2"
-			});
+  async login(username, password) {
+    try {
+      await this.page.goto(BASE_URL, {
+        waitUntil: 'networkidle2'
+      });
 
-			let loginButton = await instagram.page.$x(
-				'//a[contains(text(), "Log in")]'
-			);
+      let loginButton = await this.page.$x('//a[contains(text(), "Log in")]');
 
-			await instagram.page.waitFor(2000);
+      await this.page.waitFor(2000);
 
-			await loginButton[0].click();
+      await loginButton[0].click();
 
-			await instagram.page.waitForNavigation({
-				waitUntil: "networkidle2"
-			});
+      await this.page.waitForNavigation({
+        waitUntil: 'networkidle2'
+      });
 
-			await instagram.page.waitFor(1000);
+      await this.page.waitFor(1000);
 
-			await instagram.page.type(`input[name="username"]`, username, {
-				delay: 120
-			});
-			await instagram.page.type(`input[name="password"]`, password, {
-				delay: 120
-			});
+      await this.page.type(`input[name="username"]`, username, {
+        delay: 120
+      });
+      await this.page.type(`input[name="password"]`, password, {
+        delay: 120
+      });
 
-			loginButton = await instagram.page.$x(
-				'//div[contains(text(), "Log In")]'
-			);
+      loginButton = await this.page.$x('//div[contains(text(), "Log In")]');
 
-			await loginButton[0].click();
+      await loginButton[0].click();
 
-			await instagram.page.waitFor(1000);
-			await instagram.page.waitFor('a > span[aria-label="Profile"]');
-		} catch (e) {
-			console.log(e);
-		}
-	},
+      await this.page.waitFor(1000);
+      await this.page.waitFor('a > span[aria-label="Profile"]');
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
-	likeTagsProcess: async (tags = [], comments = []) => {
-		try {
-			for (let i = 0; i < tags.length; i++) {
-				if (i === tags.length - 1) {
-					await instagram.browser.close();
-				}
+  async likeTagsProcess(tags = [], comments = []) {
+    try {
+      for (let i = 0; i < tags.length; i++) {
+        if (i === tags.length - 1) {
+          await this.browser.close();
+        }
 
-				await instagram.page.goto(TAG_URL(tags[i]), {
-					waitUntil: "networkidle2"
-				});
+        await this.page.goto(TAG_URL(tags[i]), {
+          waitUntil: 'networkidle2'
+        });
 
-				await instagram.page.waitFor(1500);
+        await this.page.waitFor(1500);
 
-				let posts = await instagram.page.$$(
-					'article > div:nth-child(3) img[decoding="auto"]'
-				);
+        let posts = await this.page.$$(
+          'article > div:nth-child(3) img[decoding="auto"]'
+        );
 
-				for (let i = 0; i < 3; i++) {
-					let post = posts[i];
+        for (let i = 0; i < 3; i++) {
+          let post = posts[i];
 
-					await post.click();
+          try {
+            await post.click();
 
-					await instagram.page.waitFor(
-						'span[id="react-root"][aria-hidden="true"]'
-					);
-					await instagram.page.waitFor(2000);
+            await this.page.waitFor(
+              'span[id="react-root"][aria-hidden="true"]'
+            );
+            await this.page.waitFor(2000);
 
-					let isLikeable = await instagram.page.$('span[aria-label="Like"]');
+            let isLikeable = await this.page.$('span[aria-label="Like"]');
 
-					let allButtons = await instagram.page.$$("button");
+            let allButtons = await this.page.$$('button');
 
-					var randomComment =
-						comments[Math.floor(Math.random() * comments.length)];
+            var randomComment =
+              comments[Math.floor(Math.random() * comments.length)];
 
-					await instagram.page.type("textarea", randomComment, {
-						delay: 80
-					});
+            await this.page.type('textarea', randomComment, {
+              delay: 80
+            });
 
-					await instagram.page.waitFor(1500);
+            await this.page.waitFor(1500);
 
-					await allButtons[1].click();
+            await allButtons[1].click();
 
-					if (isLikeable) {
-						await instagram.page.click('span[aria-label="Like"]');
-					} else {
-						await instagram.page.keyboard.press("Escape");
-					}
+            if (isLikeable) {
+              await this.page.click('span[aria-label="Like"]');
+            } else {
+              await this.page.keyboard.press('Escape');
+            }
 
-					let postButtonTwo = await instagram.page.$x(
-						'//button[contains(text(), "Post")]'
-					);
+            let postButtonTwo = await this.page.$x(
+              '//button[contains(text(), "Post")]'
+            );
 
-					await instagram.page.waitFor(1500);
+            await this.page.waitFor(1500);
 
-					console.log("postButtonTwo", postButtonTwo);
+            if (postButtonTwo.length >= 1) {
+              await postButtonTwo[0].click();
+            }
 
-					if (postButtonTwo.length >= 1) {
-						await postButtonTwo[0].click();
-					}
+            await this.page.waitFor(2000);
 
-					await instagram.page.waitFor(2000);
+            await this.page.keyboard.press('Escape');
+          } catch (error) {
+            console.log('error', error);
+          }
+        }
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  }
 
-					await instagram.page.keyboard.press("Escape");
-				}
-			}
-		} catch (e) {
-			console.log(e);
-		}
-	},
+  async unFollowUsersProcess() {
+    await this.page.goto(FOLLOWING_URL(process.env.USERNAME), {
+      waitUntil: 'networkidle2'
+    });
 
-	unFollowUsersProcess: async () => {
-		await instagram.page.goto(FOLLOWING_URL(process.env.USERNAME), {
-			waitUntil: "networkidle2"
-		});
+    let followersButton = await this.page.$$('a');
 
-		let followersButton = await instagram.page.$$("a");
+    await this.page.waitFor(2000);
 
-		await instagram.page.waitFor(2000);
+    await followersButton[2].click();
 
-		await followersButton[2].click();
+    await this.page.waitFor(2000);
 
-		await instagram.page.waitFor(2000);
+    let allVisibleButtons = await this.page.$$('button');
 
-		let allVisibleButtons = await instagram.page.$$("button");
+    for (let i = 12; i < 30; i++) {
+      await allVisibleButtons[i].click();
 
-		for (let i = 12; i < 30; i++) {
-			await allVisibleButtons[i].click();
+      await this.page.waitFor(1000);
 
-			await instagram.page.waitFor(1000);
+      await this.page.click('button[tabindex="0"]');
+    }
+  }
+}
 
-			await instagram.page.click('button[tabindex="0"]');
-		}
-	}
-};
-
-module.exports = instagram;
+module.exports = Instagram;
