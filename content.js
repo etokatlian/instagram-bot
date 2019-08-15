@@ -1,10 +1,14 @@
 let hashtagSet = [
+  'delicious',
+  'foodlove',
   'scottsdaleaz',
+  'az',
   'foodie',
   'foodlover',
   'phoenixfoodie',
   'like4like',
   'follo4follow',
+  'yummy',
   'foodiesofinstagram',
   'phoenixfoodie',
   'azlocal',
@@ -16,6 +20,7 @@ let hashtagSet = [
   'foodporn',
   'chandleraz',
   'arizona',
+  'yum',
   'phxeats',
   'arizonafood',
   'foodies',
@@ -40,7 +45,12 @@ let comments = [
   'Holy Cannoli!! Come check out our page :) ',
   "What's cookin good lookin??!? Come check out Arizona's Restaurants :)",
   "What's shakin' bacon? Come check us out!",
-  'Such a good picture :) You should come check out our page and follow us too!'
+  'Such a good picture :) You should come check out our page and follow us too!',
+  'This made my day - could you make mine and drop me a follow?',
+  'I showed this to a friend and she loved it too! Can you drop us a follow too please?',
+  'Sweet!!! <3',
+  'LOVE this! Drop us a follow when you get a chance too',
+  'Fantastic shot - check out some of our recent posts and follow us please!'
 ];
 
 module.exports = {
