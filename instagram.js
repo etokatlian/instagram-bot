@@ -14,7 +14,7 @@ class Instagram {
   async initialize() {
     try {
       this.browser = await puppeteer.launch({
-        headless: true,
+        headless: false,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
       });
 
@@ -44,8 +44,7 @@ class Instagram {
       });
       loginButton = await this.page.$x('//div[contains(text(), "Log In")]');
       await loginButton[0].click();
-      await this.page.waitFor(1000);
-      await this.page.waitFor('a > span[aria-label="Profile"]');
+      await this.page.waitFor(5000);
     } catch (e) {
       console.log(e);
     }
@@ -60,7 +59,7 @@ class Instagram {
         await this.page.goto(TAG_URL(tags[i]), {
           waitUntil: 'networkidle2'
         });
-        await this.page.waitFor(1500);
+        await this.page.waitFor(1000);
         let posts = await this.page.$$(
           'article > div:nth-child(3) img[decoding="auto"]'
         );
@@ -68,32 +67,35 @@ class Instagram {
           let post = posts[i];
           try {
             await post.click();
-            await this.page.waitFor(
-              'span[id="react-root"][aria-hidden="true"]'
-            );
+
             await this.page.waitFor(2000);
-            let isLikeable = await this.page.$('span[aria-label="Like"]');
+
+            // get all the btns
             let allButtons = await this.page.$$('button');
-            var randomComment =
-              comments[Math.floor(Math.random() * comments.length)];
+            let allLikeButtons = await this.page.$$('span[aria-label="Like"]');
+            let allSubmitButtons = await this.page.$$('button[type="Submit"]');
+            let followButton = allButtons[1]
+            let likeButton = allLikeButtons[1]
+            let postCommentButton = allSubmitButtons[0]
+            console.log({ postCommentButton })
+
+            var randomComment = comments[Math.floor(Math.random() * comments.length)];
             await this.page.type('.Ypffh', randomComment, {
               delay: 50
             });
-            await this.page.waitFor(1500);
-            await allButtons[1].click();
-            if (isLikeable) {
-              await this.page.click('span[aria-label="Like"]');
-            } else {
-              await this.page.keyboard.press('Escape');
-            }
-            let postButtonTwo = await this.page.$x(
-              '//button[contains(text(), "Post")]'
-            );
-            await this.page.waitFor(1500);
-            if (postButtonTwo.length >= 1) {
-              await postButtonTwo[0].click();
-            }
+
+            await this.page.waitFor(1000);
+
+            await postCommentButton.click()
+
             await this.page.waitFor(2000);
+
+            await likeButton.click()
+            await this.page.waitFor(3000)
+            await followButton.click()
+            await this.page.waitFor(3000);
+
+
             await this.page.keyboard.press('Escape');
           } catch (error) {
             console.log('error', error);

@@ -6,7 +6,7 @@ const content = require('./content');
 require('dotenv').config();
 
 (async () => {
-   let k = schedule.scheduleJob('0 */4 * * *', async () => {
+  //  let k = schedule.scheduleJob('0 */4 * * *', async () => {
   let ig = new Instagram();
   try {
     await ig.initialize();
@@ -16,5 +16,5 @@ require('dotenv').config();
   } catch (e) {
     console.log(e)
   }
-   });
+  //  });
 })();
